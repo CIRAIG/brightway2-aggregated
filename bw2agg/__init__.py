@@ -23,11 +23,9 @@ __all__ = [
     'add_unit_score_exchange_and_cf',
     'add_all_unit_score_exchanges_and_cfs',
     'add_impact_scores_to_act',
-    'calculate_LCIA_array_from_LCI_array',
 ]
 
 from .aggregate import DatabaseAggregator
 from .scores import add_unit_score_exchange_and_cf, \
-    add_all_unit_score_exchanges_and_cfs, add_impact_scores_to_act, \
-    calculate_LCIA_array_from_LCI_array
+    add_all_unit_score_exchanges_and_cfs, add_impact_scores_to_act
 
