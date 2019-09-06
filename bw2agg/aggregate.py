@@ -7,7 +7,7 @@ class DatabaseAggregator(object):
                  up_db_name,
                  agg_db_name,
                  database_type='LCIA',
-                 method_list=list(bw.methods),
+                 method_list=[],
                  biosphere='biosphere3',
                  overwrite=False
                  ):
