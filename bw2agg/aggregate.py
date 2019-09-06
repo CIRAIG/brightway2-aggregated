@@ -72,9 +72,18 @@ class DatabaseAggregator(object):
                 )
             )
         if self.database_type == "LCIA":
-            assert self.methods
+            if not self.methods:
+                raise ValueError(
+                    "Need to pass a list of method identifiers to create an LCIA score database, none passed"
+                )
             for m in self.methods:
-                add_unit_score_exchange_and_cf(m, biosphere)
+                if any(
+                    [
+                        (self.biosphere, bw.Method(m).get_abbreviation()) not in [cf[0] for cf in bw.Method(m).load()],
+                        (self.biosphere, bw.Method(m).get_abbreviation()) not in bw.Database(self.biosphere)
+                    ]
+                ):
+                    add_unit_score_exchange_and_cf(m, biosphere)
             self.C_matrices = {}
 
     def __len__(self):
