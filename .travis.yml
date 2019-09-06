@@ -16,6 +16,6 @@ before_install:
   - echo $(python --version)
 install: "pip install -e ."
 script:
-  - pwd; pytest --cov=presamples
+  - pwd; pytest --cov=bw2agg
 after_success:
   - pip install python-coveralls; coveralls
