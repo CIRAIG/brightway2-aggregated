@@ -14,7 +14,7 @@ before_install:
   - source activate test-environment
   - conda install -q -c conda-forge -c cmutel -c haasad brightway2 pytest pytest-cov
   - echo $(python --version)
-install: "python setup.py develop"
+install: "pip install -e ."
 script:
   - pwd; pytest --cov=presamples
 after_success:
