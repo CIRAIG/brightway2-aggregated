@@ -6,15 +6,14 @@ from bw2agg.aggregate import add_unit_score_exchange_and_cf, DatabaseAggregator
 from bw2agg.scores import add_all_unit_score_exchanges_and_cfs, add_impact_scores_to_act
 
 
-def test_aggregated_LCIA_single_method(data_for_testing):
+def test_aggregated_LCIA_single_method_augment_on_fly(data_for_testing):
     projects.set_current(data_for_testing['project'])
     assert "techno_UP" in databases
     assert "biosphere" in databases
     assert "techno_agg_LCIA" not in databases
     assert data_for_testing['m1_name'] in methods
 
-    add_unit_score_exchange_and_cf(method=data_for_testing['m1_name'], biosphere='biosphere')
-    agg_db = DatabaseAggregator(
+    DatabaseAggregator(
         up_db_name="techno_UP", agg_db_name="techno_agg_LCIA", database_type='LCIA',
         method_list=[data_for_testing['m1_name']], biosphere='biosphere', overwrite=False
     ).generate()
@@ -32,7 +31,33 @@ def test_aggregated_LCIA_single_method(data_for_testing):
     assert lca_unit_process.score == lca_LCIA.score
 
 
-def test_aggregated_LCIA_multiple_methods(data_for_testing):
+def test_aggregated_LCIA_single_method_already_augmented(data_for_testing):
+    projects.set_current(data_for_testing['project'])
+    assert "techno_UP" in databases
+    assert "biosphere" in databases
+    assert "techno_agg_LCIA" not in databases
+    assert data_for_testing['m1_name'] in methods
+
+    add_unit_score_exchange_and_cf(method=data_for_testing['m1_name'], biosphere='biosphere')
+    DatabaseAggregator(
+        up_db_name="techno_UP", agg_db_name="techno_agg_LCIA", database_type='LCIA',
+        method_list=[data_for_testing['m1_name']], biosphere='biosphere', overwrite=False
+    ).generate()
+
+    assert "techno_agg_LCIA" in databases
+    assert len(Database("techno_agg_LCIA"))==len(Database("techno_UP"))
+
+    lca_unit_process = LCA({("techno_UP", "A"):1}, method=data_for_testing['m1_name'])
+    lca_unit_process.lci()
+    lca_unit_process.lcia()
+
+    lca_LCIA = LCA({("techno_agg_LCIA", "A"):1}, method=data_for_testing['m1_name'])
+    lca_LCIA.lci()
+    lca_LCIA.lcia()
+    assert lca_unit_process.score == lca_LCIA.score
+
+
+def test_aggregated_LCIA_multiple_methods_already_augmented(data_for_testing):
     projects.set_current(data_for_testing['project'])
     assert "techno_UP" in databases
     assert "biosphere" in databases
@@ -43,6 +68,52 @@ def test_aggregated_LCIA_multiple_methods(data_for_testing):
 
     add_all_unit_score_exchanges_and_cfs(biosphere='biosphere')
     agg_db = DatabaseAggregator(
+        up_db_name="techno_UP", agg_db_name="techno_agg_LCIA", database_type='LCIA',
+        method_list=[data_for_testing['m1_name'], data_for_testing['m2_name']], biosphere='biosphere', overwrite=False
+    ).generate()
+
+    assert "techno_agg_LCIA" in databases
+    assert len(Database("techno_agg_LCIA"))==len(Database("techno_UP"))
+
+    lca_unit_process = LCA({("techno_UP", "A"):1}, method=data_for_testing['m1_name'])
+    lca_unit_process.lci()
+    lca_unit_process.lcia()
+
+    lca_LCIA = LCA({("techno_agg_LCIA", "A"):1}, method=data_for_testing['m1_name'])
+    lca_LCIA.lci()
+    lca_LCIA.lcia()
+    assert lca_unit_process.score == lca_LCIA.score
+    score_in_B = lca_LCIA.biosphere_matrix[
+        lca_LCIA.biosphere_dict[('biosphere', Method(data_for_testing['m1_name']).get_abbreviation())],
+        lca_LCIA.activity_dict[("techno_agg_LCIA", "A")]
+    ]
+    assert score_in_B == lca_LCIA.score
+
+    lca_unit_process = LCA({("techno_UP", "A"):1}, method=data_for_testing['m2_name'])
+    lca_unit_process.lci()
+    lca_unit_process.lcia()
+
+    lca_LCIA = LCA({("techno_agg_LCIA", "A"):1}, method=data_for_testing['m2_name'])
+    lca_LCIA.lci()
+    lca_LCIA.lcia()
+    assert lca_unit_process.score == lca_LCIA.score
+    score_in_B = lca_LCIA.biosphere_matrix[
+        lca_LCIA.biosphere_dict[('biosphere', Method(data_for_testing['m2_name']).get_abbreviation())],
+        lca_LCIA.activity_dict[("techno_agg_LCIA", "A")]
+    ]
+    assert score_in_B == lca_LCIA.score
+
+
+def test_aggregated_LCIA_multiple_methods_augment_on_fly(data_for_testing):
+    projects.set_current(data_for_testing['project'])
+    assert "techno_UP" in databases
+    assert "biosphere" in databases
+    assert "techno_agg_LCIA" not in databases
+    assert data_for_testing['m1_name'] in methods
+    assert data_for_testing['m2_name'] in methods
+    assert len(methods)==2
+
+    DatabaseAggregator(
         up_db_name="techno_UP", agg_db_name="techno_agg_LCIA", database_type='LCIA',
         method_list=[data_for_testing['m1_name'], data_for_testing['m2_name']], biosphere='biosphere', overwrite=False
     ).generate()
