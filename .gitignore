@@ -1,0 +1,12 @@
+# Default ignored files
+.ipynb_checkpoints/
+.idea/
+.git/
+.pytest_cache/
+.bw2agg.egg-info/
+bw2agg.egg-info/
+bw2agg usage.ipynb
+docs/
+!docs/source
+docs/source/_static/
+docs/source/_templates/
