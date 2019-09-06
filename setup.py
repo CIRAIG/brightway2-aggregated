@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='bw2agg',
-    version='0.1',
+    version='0.1.2',
     author="Pascal Lesage",
     author_email="pascal.lesage@polymtl.ca",
     description="Extension to brightway2 package to create and work with aggregated data",
