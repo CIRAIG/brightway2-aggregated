@@ -6,9 +6,25 @@ from .utils import copy_stripped_activity_to_other_db
 
 
 def add_unit_score_exchange_and_cf(method, biosphere='biosphere3'):
-    """ Add unit score biosphere exchanges and cfs to biosphere and methods
+    """ Add unit score biosphere exchanges and cfs to biosphere and methods.
 
-    Allows the storing of LCIA results in the B matrix for LCI datasets.
+    Allows the storing of LCIA results in the B matrix for LCI datasets. Makes
+    changes inplace and does not return anything.
+
+    Parameters
+    ----------
+
+    method: tuple
+        Identification of the LCIA method, using Brightway2 tuple identifiers
+
+    biosphere: str, default `biosphere3`
+        Name of the biosphere database where biosphere exchanges are stored
+
+    Note
+    ----
+
+    This function is invoked directly by the DatabaseAggregator
+
     """
     if method not in bw.methods:
         raise ValueError("Method {} not in registered methods".format(method))
@@ -50,7 +66,16 @@ def add_unit_score_exchange_and_cf(method, biosphere='biosphere3'):
 
 
 def add_all_unit_score_exchanges_and_cfs(biosphere='biosphere3'):
-    """Add unit scores and cfs for all methods in project."""
+    """Add unit scores and cfs for all methods in project.
+
+    Makes changes inplace and does not return anything.
+
+    Parameters
+    ----------
+
+    biosphere: str, default `biosphere3`
+       Name of the biosphere database where biosphere exchanges are stored
+    """
     print("Adding unit score biosphere exchanges and characterization factors "
           "to all {} methods in project".format(len(bw.methods))
           )
