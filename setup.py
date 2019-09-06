@@ -1,6 +1,6 @@
 import setuptools
 
-with open("README.rst", "r") as fh:
+with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
@@ -10,7 +10,7 @@ setuptools.setup(
     author_email="pascal.lesage@polymtl.ca",
     description="Extension to brightway2 package to create and work with aggregated data",
     long_description=long_description,
-    long_description_content_type="text/x-rst",
+    long_description_content_type="text/markdown",
     url="https://github.com/pascallesage/brightway2-aggregated",
     install_requires=[
         'bw2calc',

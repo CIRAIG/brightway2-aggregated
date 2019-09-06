@@ -10,3 +10,4 @@ docs/
 !docs/source
 docs/source/_static/
 docs/source/_templates/
+dist/
