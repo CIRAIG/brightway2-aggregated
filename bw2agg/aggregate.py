@@ -3,6 +3,49 @@ from .scores import add_unit_score_exchange_and_cf
 import copy
 
 class DatabaseAggregator(object):
+    """ Generator to aggregate and write an LCI database.
+
+    Can be used to generate either:
+
+    - an aggregated LCI database (i.e. a database with cradle-to-gate LCI\
+      stored in the biosphere matrix)
+
+    - an aggregated LCIA database (i.e. a database with cradle-to-gate
+      characterized inventories stored in the biosphere matrix as "unit
+      impact" biosphere exchanges). This requires the creation of unit
+      impact characterization factors and biosphere exchanges.
+
+    Instantiating the class will generate the data for the new database.
+    The `generate` method will write the database.
+
+
+    Parameters
+    ----------
+
+    up_db_name: str
+        Name of the unit process database from which results will be
+        calculated. Must be a registered database name.
+    agg_db_name: str
+        Name of the new aggregated database.
+    database_type: {'LCI', 'LCIA'}, default 'LCIA'
+        Type of aggregated database to generate.
+
+        - 'LCIA' generates a database with cradle-to-gate inventories stored in the
+          biosphere matrix as "unit impact" biosphere exchanges.
+        - 'LCI' generates a database with cradle-to-gate LCI stored in the
+          biosphere matrix.
+
+        **Note that performance of LCI aggregated databases is very poor
+        due to Brightway2 assuming sparse matrices**
+    method_list: list, default list(bw.methods)
+        List of method ids (tuples) for which to generate LCIA scores.
+        Default is all methods.
+    biosphere: str, default 'biosphere3'
+        Name of the biosphere database
+    overwrite: bool, default False
+        Determines whether an existing database with name `agg_db_name`
+        will be overwritten.
+    """
     def __init__(self,
                  up_db_name,
                  agg_db_name,
@@ -11,43 +54,6 @@ class DatabaseAggregator(object):
                  biosphere='biosphere3',
                  overwrite=False
                  ):
-        """ Generator to aggregate and write an LCI database
-
-        Can be used to generate either:
-            - an aggregated LCI database (i.e. a database with cradle-to-gate
-              LCI stored in the biosphere matrix)
-            - an aggregated LCIA database (i.e. a database with cradle-to-gate
-              characterized inventories stored in the biosphere matrix as "unit
-              impact" biosphere exchanges). This requires the creation of unit
-              impact characterization factors and biosphere exchanges.
-
-        Instantiating the class will generate the data for the new database.
-        The `generate` method will write the database.
-
-        Parameters
-        ----------
-        up_db_name: str
-            Name of the unit process database from which results will be
-            calculated. Must be a registered database name.
-        agg_db_name: str
-            Name of the new aggregated database.
-        database_type: {'LCI', 'LCIA'}, default 'LCIA'
-                Type of aggregated database to generate. 'LCIA' generates a
-                database with cradle-to-gate inventories stored in the
-                biosphere matrix as "unit impact" biosphere exchanges, while 'LCI'
-                generates a database with cradle-to-gate LCI stored in the
-                biosphere matrix.
-                Note that performance of LCI aggregated databases is very poor
-                due to Brightway2 assuming sparse matrices
-            method_list: list, default list(bw.methods)
-                List of method ids (tuples) for which to generate LCIA scores.
-                Default is all methods.
-            biosphere: str, default 'biosphere3'
-                Name of the biosphere database
-            overwrite: bool, default False
-                Determines whether an existing database with name `agg_db_name`
-                will be overwritten.
-        """
         assert up_db_name in bw.databases, "Source database does not exist"
         if agg_db_name in bw.databases and not overwrite:
             print("A database named {} already exists, set `overwrite` to True to overwrite")
@@ -143,4 +149,5 @@ class DatabaseAggregator(object):
             yield ((self.new_name, obj['code']), obj)
 
     def generate(self):
+        """ Generate data and write to database"""
         bw.Database(self.new_name).write(self)
