@@ -1,6 +1,8 @@
 import brightway2 as bw
 from .scores import add_unit_score_exchange_and_cf
 import copy
+import warnings
+
 
 class DatabaseAggregator(object):
     """ Generator to aggregate and write an LCI database.
@@ -56,7 +58,7 @@ class DatabaseAggregator(object):
                  ):
         assert up_db_name in bw.databases, "Source database does not exist"
         if agg_db_name in bw.databases and not overwrite:
-            print("A database named {} already exists, set `overwrite` to True to overwrite")
+            warnings.warn("A database named {} already exists, set `overwrite` to True to overwrite".format(agg_db_name))
             return
         self.source = bw.Database(up_db_name)
         self.new_name = agg_db_name

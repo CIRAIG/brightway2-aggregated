@@ -237,3 +237,41 @@ def test_add_impact_scores_to_act_existing_db(data_for_testing):
     lca.switch_method(method=data_for_testing['m2_name'])
     lca.lcia()
     assert lca.score == act_bio_exc[('biosphere', Method(data_for_testing['m2_name']).get_abbreviation())]
+
+def test_aggregated_bd_already_exists(data_for_testing, recwarn):
+    projects.set_current(data_for_testing['project'])
+    assert "techno_UP" in databases
+    assert "biosphere" in databases
+    assert "techno_agg_LCIA" not in databases
+
+    Database('techno_agg_LCIA').register()
+    agg_db = DatabaseAggregator(
+        up_db_name="techno_UP", agg_db_name="techno_agg_LCIA", database_type='LCIA',
+        method_list=[data_for_testing['m1_name'], data_for_testing['m2_name']], biosphere='biosphere', overwrite=False
+    )
+    w = recwarn[-1]
+    assert str(w.message) == "A database named techno_agg_LCIA already exists, set `overwrite` to True to overwrite"
+
+def test_aggregated_invalid_db_type(data_for_testing):
+    projects.set_current(data_for_testing['project'])
+    assert "techno_UP" in databases
+    assert "biosphere" in databases
+    assert "techno_agg_LCIA" not in databases
+
+    with pytest.raises(ValueError, match='other is not a valid database type, should be "LCI" or "LCIA"'):
+        DatabaseAggregator(
+            up_db_name="techno_UP", agg_db_name="techno_agg_LCIA", database_type='other',
+            method_list=[data_for_testing['m1_name'], data_for_testing['m2_name']], biosphere='biosphere', overwrite=False
+        )
+
+def test_aggregated_LCIA_no_methods(data_for_testing):
+    projects.set_current(data_for_testing['project'])
+    assert "techno_UP" in databases
+    assert "biosphere" in databases
+    assert "techno_agg_LCIA" not in databases
+
+    with pytest.raises(ValueError, match='Need to pass a list of method identifiers to create an LCIA score database, none passed'):
+        DatabaseAggregator(
+            up_db_name="techno_UP", agg_db_name="techno_agg_LCIA", database_type='LCIA',
+            method_list=[], biosphere='biosphere', overwrite=False
+        )
