@@ -45,7 +45,7 @@ def add_unit_score_exchange_and_cf(method, biosphere='biosphere3'):
         ef['unit'] = m.metadata['unit']
         ef['categories'] = ('undefined',)
         ef['exchanges']: []
-        ef['type'] = 'unit exchange'
+        ef['type'] = 'unit impact exchange'
         ef.save()
         try:
             bw.mapping[(biosphere, ef_code)]

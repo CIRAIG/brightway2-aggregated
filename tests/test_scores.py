@@ -1,6 +1,7 @@
 from bw2agg.scores import add_all_unit_score_exchanges_and_cfs,\
     add_unit_score_exchange_and_cf
 from brightway2 import projects, databases, methods, Database, Method, get_activity
+import pytest
 
 
 def test_add_unit_score_exchange_and_cf(data_for_testing):
@@ -32,6 +33,47 @@ def test_add_unit_score_exchange_and_cf(data_for_testing):
     loaded_method_after = method.load()
     assert len(loaded_method_after) == 3
     assert (('biosphere', ef_code), 1) in loaded_method_after
+
+def test_add_unit_score_exchange_and_cf_no_such_method(data_for_testing):
+    projects.set_current(data_for_testing['project'])
+    assert "biosphere" in databases
+    method_name = ('some', 'fake', 'method')
+    with pytest.raises(ValueError) as exc_info:
+        add_unit_score_exchange_and_cf(method_name, biosphere='biosphere')
+    assert exc_info.value.args[0] == "Method ('some', 'fake', 'method') not in registered methods"
+
+def test_add_unit_score_exchange_and_cf_no_such_biosphere(data_for_testing):
+    projects.set_current(data_for_testing['project'])
+    method_name = data_for_testing['m1_name']
+    with pytest.raises(ValueError, match="Database biosphereXX not in registered databases"):
+        add_unit_score_exchange_and_cf(method_name, biosphere='biosphereXX')
+
+def test_add_unit_score_exchange_and_cf_act_exists(data_for_testing):
+    projects.set_current(data_for_testing['project'])
+    method_name = data_for_testing['m1_name']
+    assert len(Database('biosphere')) == 2
+    loaded_biosphere_before = Database('biosphere').load()
+    method1_name = data_for_testing['m1_name']
+    method1 = Method(method1_name)
+    loaded_method1_before = method1.load()
+    assert len(loaded_method1_before) == 2
+    ef1_code = method1.get_abbreviation()
+    assert ('biosphere', ef1_code) not in loaded_biosphere_before
+    # Manually add ef to biosphere
+    biosphere_data = Database('biosphere').load()
+    biosphere_data[("biosphere", Method(method_name).get_abbreviation())] = {
+            'name': 'Unit impact for {}'.format(method_name),
+            'type': 'unit exchange',
+            'unit': Method(method_name).metadata['unit']
+        }
+    Database('biosphere').write(biosphere_data)
+    assert len(Database('biosphere')) == 3
+    # run function, should not change the length of biosphere, but should add
+    # cf to method
+    add_unit_score_exchange_and_cf(method_name, biosphere='biosphere')
+    loaded_method1_after = method1.load()
+    assert len(loaded_method1_after) == 3
+    assert len(Database('biosphere')) == 3
 
 
 def test_add_all_unit_score_exchanges_and_cfs(data_for_testing):
